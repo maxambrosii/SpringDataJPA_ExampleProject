@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- beans нужен для подключения нужных элементов Spring Framework с сервера (Конечно же для запуска понадобится интернет)-->
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:aop="http://www.springframework.org/schema/aop"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:security="http://www.springframework.org/schema/security"
+       xmlns:tx="http://www.springframework.org/schema/tx" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:jpa="http://www.springframework.org/schema/data/jpa"
+       xsi:schemaLocation="
+                http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.2.xsd
+                http://www.springframework.org/schema/data/jpa http://www.springframework.org/schema/data/jpa/spring-jpa-1.0.xsd
+http://www.springframework.org/schema/security ">
+
+
+
+    <!-- Directory to scan for repository classes -->
+    <jpa:repositories base-package="repository"/>
+
+    <bean id="dataSource"
+          class="org.springframework.jdbc.datasource.DriverManagerDataSource">
+        <property name="driverClassName">
+            <!-- Здесь мы указываем какой драйвер для подключения к базе данных мы будем использовать -->
+            <value>com.mysql.jdbc.Driver</value>
+        </property>
+        <property name="url">
+            <!-- Здесь мы указываем полную ссылку к базе данных -->
+            <value>jdbc:mysql://192.168.64.2/FitnessClub?serverTimezone=UTC</value>
+        </property>
+        <property name="username">
+            <!-- Для того чтобы работать с базой данных мы так же предоставляем доступ программе к ней, поэтому указываем логин, в нашем случае это логин от Phpmyadmin, у меня это MaxDB, у вас скорее всего это будет root  -->
+            <value>MaxDB</value>
+        </property>
+        <property name="password">
+            <!-- Так же пароль, у вас это будет просто пустое место -->
+            <value>localhostdb</value>
+        </property>
+    </bean>
+
+    <bean id="entityManagerFactory"
+          class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean">
+        <property name="dataSource" ref="dataSource"/>
+        <property name="persistenceUnitName" value="jpaData"/>
+        <property name="jpaVendorAdapter">
+            <bean class="org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter"/>
+        </property>
+        <property name="jpaProperties">
+            <!-- Здесь мы начинаем перечислять все наши настройки -->
+            <props>
+                <!-- Подключаем hibernate dialect чтоб программа понимала, что связь будет через hibernate -->
+                <prop key="hibernate.dialect">org.hibernate.dialect.MySQLDialect</prop>
+                <!--  Так как мы работаем с Sql базой данных, нам соответственно нужно это показать, что и делает данная функция -->
+                <prop key="hibernate.show_sql">true</prop>
+                <prop key="hibernate.format_sql">false</prop>
+                <!-- Следующая строчка гораздо важней, для того чтобы мы работали уже с созданной базой данных мы указываем update, то есть после каждого выполнения мы будем только обновлять нашу базу данных, с Spring Data JPA Framework мы можем создать базу данных с нуля, а для этого указываем Create-->
+                <prop key="hibernate.hbm2ddl.auto">update</prop>
+            </props>
+        </property>
+    </bean>
+
+    <bean id="transactionManager" class="org.springframework.orm.jpa.JpaTransactionManager">
+        <property name="entityManagerFactory" ref="entityManagerFactory"/>
+    </bean>
+
+</beans>
